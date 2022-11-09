@@ -1,7 +1,7 @@
 """Utilities for plotting."""
 import importlib.resources
 import os
-from typing import Tuple
+from typing import Dict, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -22,6 +22,11 @@ def set_plotting() -> None:
 def get_default_figsize() -> Tuple[float, float]:
     """Get the default figure size"""
     return plt.rcParams["figure.figsize"]
+
+
+def get_default_corner_kwargs() -> Dict:
+    """Get the default corner kwargs"""
+    return conf.default_corner_kwargs.copy()
 
 
 def save_figure(figure: matplotlib.figure.Figure, name: str, path: str) -> None:
