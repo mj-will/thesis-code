@@ -32,6 +32,8 @@ def get_default_corner_kwargs() -> Dict:
 def save_figure(figure: matplotlib.figure.Figure, name: str, path: str) -> None:
     """Save a figure with correct format.
 
+    Will create the path if it does not exist already.
+
     Parameters
     ----------
     figure
@@ -41,5 +43,6 @@ def save_figure(figure: matplotlib.figure.Figure, name: str, path: str) -> None:
     path
         Path to the directory where the figure should be saved
     """
+    os.makedirs(path, exist_ok=True)
     filename = os.path.join(path, name + f".{conf.figure_ftype}")
     figure.savefig(filename)
