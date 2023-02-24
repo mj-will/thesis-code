@@ -71,7 +71,10 @@ def plot_surface(model: nessai.model.Model, n_points: int = 64) -> go.Figure:
 
 def get_model_class(name: str) -> nessai.model.Model:
     """Get the nessai model class"""
-    return getattr(nm, name)
+    ModelClass = getattr(nm, name)
+    if not issubclass(ModelClass, nessai.model.Model):
+        raise TypeError(f"Selected model {name} is not a valid model")
+    return ModelClass
 
 
 def upload(fig: go.Figure, filename: str) -> str:
