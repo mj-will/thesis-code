@@ -29,7 +29,9 @@ def get_default_corner_kwargs() -> Dict:
     return conf.default_corner_kwargs.copy()
 
 
-def save_figure(figure: matplotlib.figure.Figure, name: str, path: str) -> None:
+def save_figure(
+    figure: matplotlib.figure.Figure, name: str, path: str = "figures"
+) -> None:
     """Save a figure with correct format.
 
     Will create the path if it does not exist already.
