@@ -1,8 +1,10 @@
 """"Gravitational-wave utilities"""
-from typing import Dict, List
+from typing import List, Union
 
 
-def get_cbc_parameter_labels(parameters: List[str]) -> List[str]:
+def get_cbc_parameter_labels(
+    parameters: Union[List[str], str], units: bool = False, separator: str = "\;"
+) -> Union[List[str], str]:
     """Get a list of standard labels for CBC parameters.
 
     Parameters
@@ -36,5 +38,20 @@ def get_cbc_parameter_labels(parameters: List[str]) -> List[str]:
         "chi_2": r"$\chi_2$",
         "geocent_time": r"$t_{\textrm{c}}$",
     }
-    labels = [ref_labels.get(p, p) for p in parameters]
+    units = {
+        "chirp_mass": r"[M_{\odot}]",
+        "geocent_time": r"[s]",
+        "luminosity_distance": r"[\textrm{Mpc}]",
+    }
+    if isinstance(parameters, str):
+        labels = ref_labels.get(parameters, parameters)
+        if units and (u := units.get(parameters, None)):
+            labels = labels[:-1] + separator + u + "$"
+    else:
+        labels = [ref_labels.get(p, p) for p in parameters]
+        if units:
+            for i, p in enumerate(parameters):
+                u = units.get(p, None)
+                if u is not None:
+                    labels[i] = labels[i][:-1] + separator + u + "$"
     return labels
