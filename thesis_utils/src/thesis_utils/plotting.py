@@ -5,6 +5,7 @@ from typing import Dict, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 
 from . import conf
@@ -19,9 +20,9 @@ def set_plotting() -> None:
         plt.style.use(p)
 
 
-def get_default_figsize() -> Tuple[float, float]:
+def get_default_figsize() -> np.ndarray[float, float]:
     """Get the default figure size"""
-    return plt.rcParams["figure.figsize"]
+    return np.array(plt.rcParams["figure.figsize"])
 
 
 def get_default_corner_kwargs() -> Dict:
