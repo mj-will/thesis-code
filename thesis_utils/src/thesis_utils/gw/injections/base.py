@@ -42,8 +42,10 @@ class Injection:
 
     def bilby_format(self):
         """Return a dictionary with the correct format for bilby"""
-        return {
+        d = {
             key: value
             for key, value in dataclasses.asdict(self).items()
             if value is not None
         }
+        d.pop("injection_file")
+        return d
