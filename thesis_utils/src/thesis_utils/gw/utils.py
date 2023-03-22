@@ -37,6 +37,7 @@ def get_cbc_parameter_labels(
         "chi_1": r"$\chi_1$",
         "chi_2": r"$\chi_2$",
         "geocent_time": r"$t_{\textrm{c}}$",
+        "delta_phase": r"$\Delta\phi$",
     }
     units = {
         "chirp_mass": r"[M_{\odot}]",
