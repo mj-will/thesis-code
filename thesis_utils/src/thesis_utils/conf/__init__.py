@@ -26,3 +26,5 @@ default_corner_kwargs = dict(
     hist_kwargs=dict(density=True),
 )
 """Default corner plot keyword arguments"""
+
+linestyles = ["-", "--", "-.", ":"]

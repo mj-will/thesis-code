@@ -2,6 +2,8 @@
 
 teal = "#02979d"
 coral_pink = "#f97171"
+maroon = "#A10035"
+yellow = "#f5b754"
 
 # UofG colours
 burgundy = "#7D2239"
