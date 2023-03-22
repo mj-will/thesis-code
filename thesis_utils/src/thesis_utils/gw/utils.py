@@ -1,6 +1,9 @@
 """"Gravitational-wave utilities"""
 from typing import List, Union
 
+PRECESSING_SPIN_PARAMETERS = ["a_1", "a_2", "tilt_1", "tilt_2", "phi_12", "phi_jl"]
+"""List of precessing spin parameters"""
+
 
 def get_cbc_parameter_labels(
     parameters: Union[List[str], str], units: bool = False, separator: str = "\;"
