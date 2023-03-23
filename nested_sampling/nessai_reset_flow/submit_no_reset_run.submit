@@ -1,0 +1,20 @@
+universe = vanilla
+
+log = condor_logs/reset_$(cluster).$(process).log
+error = condor_logs/reset_$(cluster).$(process).err
+output = condor_logs/reset_$(cluster).$(process).out
+
+request_cpus   = 1
+request_memory = 2GB
+request_disk = 2GB
+
+executable = run_nessai_reset_gaussian.py
+arguments = 0
+transfer_input_files =
+
+should_transfer_files = False
+#when_to_transfer_output = ON_EXIT_OR_EVICT
+
+getEnv = True
+
+queue
