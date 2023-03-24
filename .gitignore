@@ -1,2 +1,3 @@
 outdir*
 condor_logs/
+*.pdf
