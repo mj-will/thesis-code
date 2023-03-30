@@ -1,9 +1,19 @@
 """I/O utilities"""
-from typing import Any
+from typing import Any, Optional
 import json
 import pickle
 
 import h5py
+
+
+class JSONEncoder(json.JSONEncoder):
+    """JSON encoder that can handle objects"""
+
+    def default(self, obj):
+        if isinstance(obj, object):
+            return str(obj)
+
+        return json.JSONEncoder.default(self, obj)
 
 
 def load_json(filename: str) -> dict:
@@ -13,10 +23,12 @@ def load_json(filename: str) -> dict:
     return d
 
 
-def write_json(data: dict, filename: str) -> None:
+def write_json(
+    data: dict, filename: str, cls: Optional[json.JSONEncoder] = None
+) -> None:
     """Write data to a JSON file"""
     with open(filename, "w") as fp:
-        json.dump(data, fp, indent=4)
+        json.dump(data, fp, indent=4, cls=cls)
 
 
 def load_pickle(filename: str) -> Any:
