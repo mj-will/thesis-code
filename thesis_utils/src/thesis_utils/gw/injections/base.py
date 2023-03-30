@@ -1,4 +1,5 @@
 """Class for lazily loading injections"""
+import copy
 import dataclasses
 from typing import Optional
 
@@ -31,6 +32,8 @@ class Injection:
     dec: Optional[float] = None
     chi_1: Optional[float] = None
     chi_2: Optional[float] = None
+    lambda_1: Optional[float] = None
+    lambda_2: Optional[float] = None
     luminosity_distance: Optional[float] = None
     geocent_time: Optional[float] = None
 
@@ -48,8 +51,9 @@ class Injection:
 
         Returns a copy with the precessing spin parameters set to None.
         """
-        replace = {k: None for k in PRECESSING_SPIN_PARAMETERS}
-        out = dataclasses.replace(self, **replace)
+        out = copy.deepcopy(self)
+        for key in PRECESSING_SPIN_PARAMETERS:
+            setattr(out, key, None)
 
         for i in [1, 2]:
             c = f"chi_{i}"
