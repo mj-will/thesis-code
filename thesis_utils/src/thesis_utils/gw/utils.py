@@ -22,10 +22,12 @@ def get_cbc_parameter_labels(
     ref_labels = {
         "mass_ratio": "$q$",
         "chirp_mass": r"$\mathcal{M}$",
-        "mass_1": r"m_1",
-        "mass_2": r"m_2",
-        "a_1": r"$\chi_1$",
-        "a_2": r"$\chi_2$",
+        "mass_1": r"$m_1$",
+        "mass_2": r"$m_2$",
+        "m_1": r"$m_1$",
+        "m_2": r"$m_2$",
+        "a_1": r"$a_1$",
+        "a_2": r"$a_2$",
         "dec": r"$\delta$",
         "ra": r"$\alpha$",
         "geocent_tme": r"$t_\textrm{c}$",
@@ -39,23 +41,31 @@ def get_cbc_parameter_labels(
         "phase": r"$\phi$",
         "chi_1": r"$\chi_1$",
         "chi_2": r"$\chi_2$",
+        "chi_eff": r"$\chi_\textrm{eff}$",
+        "chi_p": r"$\chi_{p}$",
         "geocent_time": r"$t_{\textrm{c}}$",
         "delta_phase": r"$\Delta\phi$",
+        "lambda_1": r"$\lambda_1$",
+        "lambda_2": r"$\lambda_2$",
     }
-    units = {
+    ref_units = {
         "chirp_mass": r"[M_{\odot}]",
+        "mass_1": r"[M_{\odot}]",
+        "mass_2": r"[M_{\odot}]",
+        "m_1": r"[M_{\odot}]",
+        "m_2": r"[M_{\odot}]",
         "geocent_time": r"[s]",
         "luminosity_distance": r"[\textrm{Mpc}]",
     }
     if isinstance(parameters, str):
         labels = ref_labels.get(parameters, parameters)
-        if units and (u := units.get(parameters, None)):
+        if units and (u := ref_units.get(parameters, None)):
             labels = labels[:-1] + separator + u + "$"
     else:
         labels = [ref_labels.get(p, p) for p in parameters]
         if units:
             for i, p in enumerate(parameters):
-                u = units.get(p, None)
+                u = ref_units.get(p, None)
                 if u is not None:
                     labels[i] = labels[i][:-1] + separator + u + "$"
     return labels
