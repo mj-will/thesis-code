@@ -1,7 +1,7 @@
 """Utilities for plotting."""
 import importlib.resources
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ def get_default_corner_kwargs() -> Dict:
 
 
 def save_figure(
-    figure: matplotlib.figure.Figure, name: str, path: str = "figures"
+    figure: matplotlib.figure.Figure, name: str, path: str = "figures", **kwargs: Any
 ) -> None:
     """Save a figure with correct format.
 
@@ -49,7 +49,7 @@ def save_figure(
     """
     os.makedirs(path, exist_ok=True)
     filename = os.path.join(path, name + f".{conf.figure_ftype}")
-    figure.savefig(filename)
+    figure.savefig(filename, **kwargs)
 
 
 def pp_plot(
