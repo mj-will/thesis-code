@@ -3,7 +3,7 @@
 # see: https://github.com/garrettj403/SciencePlots
 
 # Set default figure size
-# figure.figsize : 3.5, 2.625
+figure.figsize : 6.141732, 3.79579912579
 
 # Set x axis
 xtick.direction : in
