@@ -51,8 +51,8 @@ def get_cbc_parameter_labels(
         "delta_phase": r"$\Delta\phi$",
         "lambda_1": r"$\lambda_1$",
         "lambda_2": r"$\lambda_2$",
-        "lambda_tilde": r"$\tilde{\lambda}$",
-        "delta_lambda_tilde": r"$\Delta\tilde{\lambda}$",
+        "lambda_tilde": r"$\tilde{\Lambda}$",
+        "delta_lambda_tilde": r"$\delta\tilde{\Lambda}$",
     }
     ref_units = {
         "chirp_mass": r"[M_{\odot}]",
