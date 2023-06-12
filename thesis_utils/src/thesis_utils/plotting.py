@@ -17,6 +17,8 @@ def set_plotting() -> None:
     sns.set_palette("colorblind")
     # sns.set_style("ticks")
     # sns.set_context("paper")
+    os.environ["BILBY_STYLE"] = "none"
+    os.environ["bilby_style"] = "none"
     with importlib.resources.path("thesis_utils.conf", "thesis.mplstyle") as p:
         plt.style.use(p)
 
