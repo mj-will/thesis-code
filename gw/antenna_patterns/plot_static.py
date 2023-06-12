@@ -8,7 +8,7 @@ import os
 import numpy as np
 from antenna_patterns import f_cross, f_plus
 from thesis_utils.coordinates import spherical_to_cartesian
-from thesis_utils.plotting import get_default_figsize
+from thesis_utils.plotting import get_default_figsize, crop_pdf
 from typing import Optional
 
 import plotly.graph_objects as go
@@ -29,15 +29,16 @@ def plot_surface(
             y=y,
             z=z,
             surfacecolor=surfacecolor,
-            colorscale="tealgrn",
+            colorscale="Bluyl",
             cmin=0.0,
+            cmid=0.5,
             cmax=1.0,
             colorbar=dict(
                 lenmode="fraction",
                 len=0.5,
                 thickness=20,
                 orientation="h",
-                y=-0.1,
+                y=0.05,
             ),
         ),
     )
@@ -51,26 +52,31 @@ def main() -> None:
     dpi = 100
 
     # A third of the width for 3 subplots
-    figsize_inches[0] /= 2
+    figsize_inches[0] /= 2.8
     figsize = dpi * figsize_inches
+    figsize *= 0.8
 
-    dist = 1.8
+    dist = 1.5
     camera = dict(
-        # up=dict(x=0, y=0, z=1),
-        # center=dict(x=0, y=0, z=0),
-        eye=dict(x=dist, y=dist, z=dist)
+        up=dict(x=0, y=0, z=1),
+        center=dict(x=0, y=0, z=0),
+        eye=dict(x=dist, y=dist, z=dist),
     )
 
     scene = dict(
         camera=camera,
-        xaxis=dict(range=[-0.65, 0.65], nticks=5),
-        yaxis=dict(range=[-0.65, 0.65], nticks=5),
-        zaxis=dict(range=[-1.0, 1.0], nticks=5),
+        xaxis=dict(range=[-0.65, 0.65], nticks=5, autorange=False),
+        yaxis=dict(range=[-0.65, 0.65], nticks=5, autorange=False),
+        zaxis=dict(range=[-1.0, 1.0], nticks=5, autorange=False),
+        xaxis_visible=False,
+        yaxis_visible=False,
+        zaxis_visible=False,
+        aspectratio={"x": 1.0, "y": 1.0, "z": 1.5},
     )
 
     ifo = go.Scatter3d(
-        x=[0.6, 0, 0],
-        y=[0, 0, 0.6],
+        x=[0.5, 0, 0],
+        y=[0, 0, 0.5],
         z=[0, 0, 0],
         mode="lines",
         showlegend=False,
@@ -80,7 +86,7 @@ def main() -> None:
         ),
     )
 
-    n = 100
+    n = 200
     theta = np.linspace(0, np.pi, n)
     phi = np.linspace(0, 2 * np.pi, n)
     psi = np.linspace(0, np.pi, 11, endpoint=True)
@@ -94,43 +100,39 @@ def main() -> None:
     fp = f_plus(theta_grid, phi_grid, 0) ** 2
     fc = f_cross(theta_grid, phi_grid, 0) ** 2
 
-    x, y, z = spherical_to_cartesian(theta_grid, phi_grid, fc)
-    fig = plot_surface(x, y, z, surfacecolor=fc)
-    fig.add_trace(ifo)
+    x, y, z = spherical_to_cartesian(theta_grid, phi_grid, 1.0)
+    for sf, filename in zip(
+        [fp, fc], ["antenna_cross.pdf", "antenna_plus.pdf"]
+    ):
 
-    fig.update_layout(
-        font_family="Serif",
-        scene=scene,
-        margin_l=5,
-        margin_t=5,
-        margin_b=5,
-        margin_r=5,
-    )
+        fig = plot_surface(sf * x, sf * y, sf * z, surfacecolor=sf)
+        fig.add_trace(ifo)
 
-    fig.write_image(
-        os.path.join(figure_dir, "antenna_cross.pdf"),
-        width=figsize[0],
-        height=figsize[1],
-    )
+        fig.update_layout(
+            autosize=False,
+            font_family="Serif",
+            scene=scene,
+            margin_l=0,
+            margin_t=0,
+            margin_b=5,
+            margin_r=0,
+            width=figsize[0],
+            height=figsize[1],
+        )
 
-    x, y, z = spherical_to_cartesian(theta_grid, phi_grid, fp)
-    fig = plot_surface(x, y, z, surfacecolor=fp)
-    fig.add_trace(ifo)
+        fig.write_image(
+            os.path.join(figure_dir, filename),
+            width=figsize[0],
+            height=figsize[1],
+        )
 
-    fig.update_layout(
-        font_family="Serif",
-        scene=scene,
-        margin_l=5,
-        margin_t=5,
-        margin_b=5,
-        margin_r=5,
-    )
-
-    fig.write_image(
-        os.path.join(figure_dir, "antenna_plus.pdf"),
-        width=figsize[0],
-        height=figsize[1],
-    )
+        crop_pdf(
+            os.path.join(figure_dir, filename),
+            30,
+            10,
+            0,
+            0,
+        )
 
 
 if __name__ == "__main__":
