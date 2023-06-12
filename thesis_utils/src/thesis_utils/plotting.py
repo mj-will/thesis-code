@@ -126,3 +126,28 @@ def pp_plot(
     ax.set_ylim([0, 1])
     plt.tight_layout()
     return fig
+
+
+def crop_pdf(
+    filename: str, top: float, bottom: float, left: float, right: float
+) -> None:
+    """Crop a PDF"""
+    from pypdf import PdfWriter, PdfReader
+
+    with open(filename, "rb") as f:
+        orig = PdfReader(f)
+        cropped = PdfWriter()
+
+        image = orig.pages[0]
+        image.mediabox.upper_right = (
+            image.mediabox.right - right,
+            image.mediabox.top - top,
+        )
+        image.mediabox.lower_left = (
+            image.mediabox.left + left,
+            image.mediabox.bottom + bottom,
+        )
+        cropped.add_page(image)
+
+    with open(filename, "wb") as f:
+        cropped.write(f)
