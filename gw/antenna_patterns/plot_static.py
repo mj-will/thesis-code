@@ -29,7 +29,8 @@ def plot_surface(
             y=y,
             z=z,
             surfacecolor=surfacecolor,
-            colorscale="Bluyl",
+            # colorscale="Bluyl",
+            colorscale="deep",
             cmin=0.0,
             cmid=0.5,
             cmax=1.0,
@@ -102,7 +103,7 @@ def main() -> None:
 
     x, y, z = spherical_to_cartesian(theta_grid, phi_grid, 1.0)
     for sf, filename in zip(
-        [fp, fc], ["antenna_cross.pdf", "antenna_plus.pdf"]
+        [fp, fc], ["antenna_plus.pdf", "antenna_cross.pdf"]
     ):
 
         fig = plot_surface(sf * x, sf * y, sf * z, surfacecolor=sf)
