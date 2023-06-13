@@ -1,3 +1,7 @@
+# General Python
+__pycache__
+
+# Project specific
 outdir*
 condor_logs/
 *.pdf
