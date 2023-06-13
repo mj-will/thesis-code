@@ -28,6 +28,9 @@ axes.linewidth : 0.5
 grid.linewidth : 0.5
 lines.linewidth : 1.
 
+# Errobars
+errorbar.capsize : 3.0
+
 # Remove legend frame
 legend.frameon : False
 
