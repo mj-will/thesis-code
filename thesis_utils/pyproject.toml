@@ -12,10 +12,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
+    "bilby[gw]",
     "matplotlib",
     "nessai",
     "nessai-models",
+    "natsort",
     "numpy",
+    "pandas",
     "seaborn",
     "torch",
 ]
