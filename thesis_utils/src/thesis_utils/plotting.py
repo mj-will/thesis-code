@@ -37,7 +37,10 @@ def get_default_corner_kwargs() -> Dict:
 
 
 def save_figure(
-    figure: matplotlib.figure.Figure, name: str, path: str = "figures", **kwargs: Any
+    figure: matplotlib.figure.Figure,
+    name: str,
+    path: str = "figures",
+    **kwargs: Any,
 ) -> None:
     """Save a figure with correct format.
 
@@ -145,7 +148,8 @@ def make_pp_plot_bilby_results(
     include_legend=True,
     weight_list=None,
     palette="RdYlBu",
-    **kwargs
+    colours=None,
+    **kwargs,
 ):
     """
     Make a P-P plot for a set of runs with injected signals from bilby.
@@ -168,16 +172,15 @@ def make_pp_plot_bilby_results(
     credible_levels = list()
     for i, result in enumerate(results):
         credible_levels.append(
-            result.get_all_injection_credible_levels(
-                keys, weights=weight_list[i]
-            )
+            result.get_all_injection_credible_levels(keys, weights=weight_list[i])
         )
     credible_levels = pd.DataFrame(credible_levels)
 
     if lines is None:
-        colors = sns.color_palette(palette, n_colors=6)
+        if colours is None:
+            colours = sns.color_palette(palette, n_colors=6)
         linestyles = ["-", "--", ":"]
-        style = list(product(linestyles, colors))
+        style = list(product(linestyles, colours))
 
     x_values = np.linspace(0, 1, 1001)
 
@@ -222,7 +225,7 @@ def make_pp_plot_bilby_results(
         pvalue = stats.kstest(credible_levels[key], "uniform").pvalue
         pvalues.append(pvalue)
         print("{}: {}".format(key, pvalue))
-        
+
         if labels:
             try:
                 name = labels[key]
@@ -237,7 +240,7 @@ def make_pp_plot_bilby_results(
             ls=style[ii][0],
             c=style[ii][1],
             label=label,
-            **kwargs
+            **kwargs,
         )
 
     Pvals = namedtuple("pvals", ["combined_pvalue", "pvalues", "names"])
@@ -250,9 +253,7 @@ def make_pp_plot_bilby_results(
 
     if title:
         ax.set_title(
-            "N={}, p-value={:2.4f}".format(
-                len(credible_levels), pvals.combined_pvalue
-            )
+            "N={}, p-value={:2.4f}".format(len(credible_levels), pvals.combined_pvalue)
         )
     ax.set_xlabel("C.I.")
     ax.set_ylabel("Fraction of events in C.I.")
@@ -267,6 +268,7 @@ def make_pp_plot_bilby_results(
     ax.set_ylim(0, 1)
     fig.tight_layout()
     return fig, pvals
+
 
 def crop_pdf(
     filename: str, top: float, bottom: float, left: float, right: float
