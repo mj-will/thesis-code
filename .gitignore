@@ -1,5 +1,6 @@
 # General Python
 __pycache__
+.ipynb_checkpoints
 
 # Project specific
 outdir*
