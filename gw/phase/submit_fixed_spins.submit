@@ -1,0 +1,18 @@
+universe = vanilla
+
+log = condor_logs/phase_$(cluster).$(process).log
+error = condor_logs/phase_$(cluster).$(process).err
+output = condor_logs/phase_$(cluster).$(process).out
+
+request_cpus   = 8
+request_memory = 8GB
+request_disk = 4GB
+
+executable = run_from_config.py
+arguments = --config configs/quaternions.json --label quaternions_default --n-pool=8 --fix-spins --outdir outdir/fix-spins/
+
+should_transfer_files = False
+
+getEnv = True
+
+queue

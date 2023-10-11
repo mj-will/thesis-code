@@ -1,0 +1,18 @@
+universe = vanilla
+
+log = condor_logs/phase_$(cluster).$(process).log
+error = condor_logs/phase_$(cluster).$(process).err
+output = condor_logs/phase_$(cluster).$(process).out
+
+request_cpus   = 8
+request_memory = 8GB
+request_disk = 4GB
+
+executable = run_from_config.py
+arguments = --config configs/gw_v13.json --label gw_v13_rerun --n-pool=8
+
+should_transfer_files = False
+
+getEnv = True
+
+queue
