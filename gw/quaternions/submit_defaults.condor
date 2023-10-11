@@ -1,0 +1,21 @@
+universe = vanilla
+
+executable = run.py
+arguments  = "--label=dynesty_defaults --default-parameters --dynesty"
+#transfer_input_files = quaternions.py
+
+output = condor_logs/defaults.out
+error  = condor_logs/defaults.error
+log    = condor_logs/defaults.log
+
+request_cpus   = 8
+request_memory = 8GB
+request_disk = 8GB
+
+should_transfer_files = False
+#when_to_transfer_output = ON_EXIT_OR_EVICT
+getEnv = True
+
+#Requirements = (Machine == "wiay.astro.gla.ac.uk")
+
+queue
