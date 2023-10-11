@@ -13,6 +13,8 @@ from quaternions import (
     generate_all_bbh_parameters,
 )
 
+from thesis_utils.gw import injections
+
 
 def parse_args():
     """Parse the command line arguments"""
@@ -21,6 +23,11 @@ def parse_args():
         "--default-parameters",
         action="store_true",
         help="Enable the default parameters instead of quaternions",
+    )
+    parser.add_argument(
+        "--dynesty",
+        action="store_true",
+        help="Sample with dynesty",
     )
     parser.add_argument(
         "--label", type=str, help="Label for the run", default=None
@@ -41,8 +48,12 @@ def main():
     else:
         label = "quaternions"
 
+    print(f"Results will be saved to {outdir}")
+
     bilby.core.utils.setup_logger(
-        outdir=outdir, label=label, log_level="WARNING"
+        outdir=outdir,
+        label=label,
+        log_level="INFO",
     )
 
     duration = 4.0
@@ -50,24 +61,9 @@ def main():
 
     np.random.seed(151226)
 
-    injection_parameters = dict(
-        total_mass=66.0,
-        mass_ratio=0.9,
-        a_1=0.4,
-        a_2=0.3,
-        tilt_1=0.5,
-        tilt_2=1.0,
-        phi_12=1.7,
-        phi_jl=0.3,
-        luminosity_distance=2000,
-        theta_jn=0.4,
-        psi=2.659,
-        phase=1.3,
-        geocent_time=1126259642.413,
-        ra=1.375,
-        dec=-1.2108,
-    )
+    injection_parameters = injections.BBH_GW150914.bilby_format()
 
+    print("Creating waveform generator")
     waveform_arguments = dict(
         waveform_approximant="IMRPhenomPv2", reference_frequency=50.0
     )
@@ -91,8 +87,9 @@ def main():
         waveform_generator=waveform_generator, parameters=injection_parameters
     )
 
-    # Set up prior
+    print("Creating priors")
     priors = bilby.gw.prior.BBHPriorDict()
+    priors["chirp_mass"] = bilby.gw.prior.UniformInComponentsChirpMass(20, 40)
     priors["geocent_time"] = bilby.core.prior.Uniform(
         minimum=injection_parameters["geocent_time"] - 0.1,
         maximum=injection_parameters["geocent_time"] + 0.1,
@@ -114,6 +111,8 @@ def main():
             priors[f"q_{i}"] = bilby.core.prior.Gaussian(
                 0, 1, name=f"q_{i}", latex_label=f"$q_{i}$"
             )
+        # priors["q_0"] = bilby.core.prior.HalfNormal(1, label="$q_0$")
+        # priors["q_3"] = bilby.core.prior.HalfNormal(1, label="$q_3$")
     else:
         print("Not using the quaternions")
 
@@ -121,15 +120,41 @@ def main():
     for fp in fixed_parameters:
         priors[fp] = injection_parameters[fp]
 
+    print("Creating quaternion likelihood")
+
     likelihood = GravitationalWaveTransientWithQuaternions(
         interferometers=ifos,
         waveform_generator=waveform_generator,
         priors=priors,
         phase_marginalization=False,
         distance_marginalization=True,
+        time_marginalization=False,
     )
 
-    reparameterisations = {"mass_ratio": "default"}
+    print("Starting sampling")
+
+    if args.dynesty:
+        sampler = "dynesty"
+        kwargs = dict(
+            nlive=1000,
+            sample="acceptance-walk",
+            naccept=20,
+            check_point_plot=True,
+            check_point_delta_t=1800,
+            print_method="interval-60",
+        )
+    else:
+        sampler = "nessai"
+        kwargs = dict(
+            nlive=2000,
+            flow_class="FlowProposal",
+            flow_config=dict(model_config=dict(n_blocks=6, n_neurons=64)),
+            n_pool=8,
+            # reparameterisations=reparameterisations,
+            use_default_reparameterisations=True,
+            fallback_reparameterisation="z-score",
+            reset_flow=8,
+        )
 
     result = bilby.core.sampler.run_sampler(
         likelihood=likelihood,
@@ -138,16 +163,11 @@ def main():
         injection_parameters=injection_parameters,
         label=label,
         conversion_function=generate_all_bbh_parameters,
-        flow_class="GWFlowProposal",
-        sampler="nessai",
+        sampler=sampler,
         resume=False,
         plot=True,
-        nlive=2000,
         seed=150914,
-        flow_config=dict(model_config=dict(n_transforms=6)),
-        n_pool=16,
-        reparameterisations=reparameterisations,
-        reset_flow=8,
+        **kwargs,
     )
 
     result.plot_corner()

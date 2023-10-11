@@ -14,7 +14,8 @@ from thesis_utils.plotting import (
     save_figure,
     set_plotting,
 )
-from thesis_utils import conf
+from thesis_utils import colours
+from thesis_utils.gw import get_cbc_parameter_labels
 
 
 @dataclass
@@ -32,6 +33,10 @@ def main():
         priors[f"q_{i}"] = bilby.core.prior.Gaussian(
             0, 1, name=f"q_{i}", latex_label=f"$q_{i}$"
         )
+
+    # priors["q_0"] = bilby.core.prior.HalfNormal(1)
+    # priors["q_3"] = bilby.core.prior.HalfNormal(1)
+
     priors = bilby.core.prior.PriorDict(priors)
     quaternion_names = list(priors.keys())
 
@@ -44,9 +49,12 @@ def main():
     corner_kwargs = get_default_corner_kwargs()
     corner_kwargs["quantiles"] = None
     corner_kwargs["show_titles"] = False
+    corner_kwargs["fill_contours"] = False
 
     quaternion_labels = [rf"$q_{i}$" for i in range(4)]
-    source_angles_labels = [r"$\psi$", r"$\theta_{JN}$", r"$\phi$"]
+    source_angles_labels = get_cbc_parameter_labels(
+        ["psi", "theta_jn", "phase"]
+    )
 
     fig = corner.corner(quaternions, labels=quaternion_labels, **corner_kwargs)
     save_figure(fig, "quaternions_prior", "figures")
@@ -73,7 +81,7 @@ def main():
     ]
 
     for i, p in zip(diagnonal_indices, analytic_priors):
-        fig.axes[i].plot(p.x, p.pdf, color=conf.highlight_colour)
+        fig.axes[i].plot(p.x, p.pdf, color=colours.yellow)
 
     save_figure(fig, "source_angles_from_quaterions_prior", "figures")
 
