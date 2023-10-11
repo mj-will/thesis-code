@@ -1,0 +1,4 @@
+{
+    "train_on_empty": false,
+    "training_frequency": 4000
+}

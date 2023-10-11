@@ -1,0 +1,5 @@
+{
+    "train_on_empty": false,
+    "training_frequency": 4000,
+    "constant_volume_mode": false
+}
