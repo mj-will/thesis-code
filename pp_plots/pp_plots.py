@@ -10,6 +10,7 @@ from scipy import stats
 from thesis_utils.plotting import (
     save_figure,
     set_plotting,
+    get_default_figsize,
 )
 from thesis_utils.random import seed_everything
 
@@ -62,8 +63,10 @@ def main():
     confidence_intervals = [0.68, 0.95, 0.997]
     x_values = np.linspace(0, 1, n_steps, endpoint=True)
 
-    fig, axs = plt.subplots(2, 2, sharex=True, sharey=True)
-    axs = axs.ravel()
+    figsize = get_default_figsize()
+    figsize[1] *= 1.5
+
+    fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, figsize=figsize)
     for ci in confidence_intervals:
         edge_of_bound = (1.0 - ci) / 2.0
         lower = stats.binom.ppf(1 - edge_of_bound, n, x_values) / n
@@ -72,15 +75,22 @@ def main():
         upper[0] = 0
         lower[-1] = 1
         upper[-1] = 1
-        for ax in axs:
+        for ax in axs.flat:
             ax.fill_between(x_values, lower, upper, alpha=0.1, color="k")
 
-    for ax, example in zip(axs, examples.values()):
+    for ax, example in zip(axs.flat, examples.values()):
         pp = get_pp_plot_data(n_steps=n_steps, n=n, n_post=n_post, **example)
         ax.plot(x_values, pp)
         ax.set_title(example["label"])
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
+
+    axs[1, 0].set_xlabel("Theoretical cumulative distribution")
+    axs[1, 1].set_xlabel("Theoretical cumulative distribution")
+
+    axs[0, 0].set_ylabel("Empirical cumulative distribution")
+    axs[1, 0].set_ylabel("Empirical cumulative distribution")
+
     plt.tight_layout()
     save_figure(fig, "pp_plot_comparison", "figures")
 
