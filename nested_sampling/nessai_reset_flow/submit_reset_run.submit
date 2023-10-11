@@ -4,7 +4,7 @@ log = condor_logs/reset_$(cluster).$(process).log
 error = condor_logs/reset_$(cluster).$(process).err
 output = condor_logs/reset_$(cluster).$(process).out
 
-request_cpus   = 1
+request_cpus   = 4
 request_memory = 2GB
 request_disk = 2GB
 
