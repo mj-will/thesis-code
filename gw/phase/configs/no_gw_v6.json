@@ -1,0 +1,21 @@
+{
+    "phase_marginalization":  false,
+    "sampler_kwargs": {
+        "nlive": 2000,
+        "flow_class": "FlowProposal",
+        "latent_prior": "uniform_nball",
+        "reset_flow": 8,
+        "volume_fraction": 0.98,
+        "flow_config": {
+            "model_config": {
+                "n_blocks": 8,
+                "n_neurons": 32,
+                "kwargs" : {
+                    "batch_norm_between_layers": true,
+                    "linear_transform": "lu",
+                    "scale_activation": "softplus"
+                }
+            }
+        }
+    }
+}

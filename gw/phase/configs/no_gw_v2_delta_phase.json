@@ -1,0 +1,16 @@
+{
+    "phase_marginalization":  false,
+    "delta_phase": true,
+    "sampler_kwargs": {
+        "nlive": 2000,
+        "flow_class": "FlowProposal",
+        "reset_flow": 8,
+        "volume_fraction": 0.98,
+        "flow_config": {
+            "model_config": {
+                "n_blocks": 10,
+                "n_neurons": 32
+            }
+        }
+    }
+}

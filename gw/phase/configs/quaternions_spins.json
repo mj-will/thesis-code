@@ -1,0 +1,19 @@
+{
+    "phase_marginalization": false,
+    "quaternions": true,
+    "sampler_kwargs": {
+        "nlive": 2000,
+        "flow_class": "GWFlowProposal",
+        "reparameterisations": {
+            "a_1": "to-cartesian",
+            "a_2": "to-cartesian"
+        },
+        "fallback_reparameterisation": "z-score",
+        "flow_config": {
+            "model_config": {
+                "n_blocks": 6,
+                "n_neurons": 32
+            }
+        }
+    }
+}

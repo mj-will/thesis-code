@@ -1,0 +1,13 @@
+{
+    "phase_marginalization":  true,
+    "sampler_kwargs": {
+        "nlive": 2000,
+        "flow_class": "GWFlowProposal",
+        "flow_config": {
+            "model_config": {
+                "n_blocks": 6,
+                "n_neurons": 32
+            }
+        }
+    }
+}

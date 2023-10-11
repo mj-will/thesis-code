@@ -1,0 +1,20 @@
+{
+    "phase_marginalization":  false,
+    "quaternions": false,
+    "delta_phase": false,
+    "sampler_kwargs": {
+        "nlive": 2000,
+        "flow_class": "GWFlowProposal",
+        "volume_fraction": 0.98,
+        "reparameterisations": {
+            "a_1": "to-cartesian",
+            "a_2": "to-cartesian"
+        },
+        "flow_config": {
+            "model_config": {
+                "n_blocks": 6,
+                "n_neurons": 32
+            }
+        }
+    }
+}

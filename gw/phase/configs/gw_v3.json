@@ -1,0 +1,18 @@
+{
+    "phase_marginalization":  false,
+    "sampler_kwargs": {
+        "nlive": 2000,
+        "flow_class": "GWFlowProposal",
+        "reparameterisations": {
+            "theta_jn": "z-score",
+            "tilt_1": "z-score",
+            "tilt_2": "z-score"
+        },
+        "flow_config": {
+            "model_config": {
+                "n_blocks": 6,
+                "n_neurons": 32
+            }
+        }
+    }
+}
