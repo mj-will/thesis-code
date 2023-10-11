@@ -1,0 +1,15 @@
+delay =
+dims =
+npool =
+executable = run_scaling_test.py
+arguments = "--delay=$(delay) --dims=$(dims) --npool=$(npool)"
+
+output = condor_logs/delay_test_$(delay)ms_$(dims)d_npool_$(npool).out
+error = condor_logs/delay_test_$(delay)ms_$(dims)d_npool_$(npool).err
+log = condor_logs/delay_test_$(delay)ms_$(dims)d_npool_$(npool).log
+
+request_cpus   = $(npool)
+request_memory = 1024
+getEnv = True
+
+queue
