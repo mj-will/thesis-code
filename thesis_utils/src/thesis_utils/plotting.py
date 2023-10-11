@@ -3,10 +3,15 @@ from collections import namedtuple
 import importlib.resources
 from itertools import product
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import corner
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from natsort import natsorted
+from nessai import config as nessai_config
+from nessai.plot import corner_plot
 import numpy as np
 from scipy import stats
 import seaborn as sns
@@ -18,10 +23,9 @@ from . import conf
 def set_plotting() -> None:
     """Set the plotting defaults"""
     sns.set_palette("colorblind")
-    # sns.set_style("ticks")
-    # sns.set_context("paper")
     os.environ["BILBY_STYLE"] = "none"
     os.environ["bilby_style"] = "none"
+    nessai_config.plotting.disable_style = True
     with importlib.resources.path("thesis_utils.conf", "thesis.mplstyle") as p:
         plt.style.use(p)
 
@@ -34,6 +38,14 @@ def get_default_figsize() -> np.ndarray[float, float]:
 def get_default_corner_kwargs() -> Dict:
     """Get the default corner kwargs"""
     return conf.default_corner_kwargs.copy()
+
+
+def get_corner_figsize(n: int) -> float:
+    """Get the size of a corner plot based on the number of parameters"""
+    figsize = get_default_figsize()
+    figsize[0] = figsize[1]
+    figsize *= float(n) / 3
+    return figsize
 
 
 def save_figure(
@@ -268,6 +280,176 @@ def make_pp_plot_bilby_results(
     ax.set_ylim(0, 1)
     fig.tight_layout()
     return fig, pvals
+
+
+def plot_acceptance(
+    samplers: List, figsize: Tuple[float] = None, filename: Optional[str] = None
+):
+    """Plot the acceptance of a nested sampling run"""
+    ls = nessai_config.plotting.line_styles
+
+    if figsize is None:
+        figsize = get_default_figsize()
+        figsize[1] *= 1.3
+
+    fig, axs = plt.subplots(4, 1, sharex=True, figsize=figsize)
+
+    for i, ns in enumerate(samplers):
+        it = (np.arange(len(ns.min_likelihood))) * (ns.nlive // 10)
+        dtrain = np.array(ns.training_iterations[1:]) - np.array(
+            ns.training_iterations[:-1]
+        )
+        axs[0].plot(it, ns.mean_acceptance_history, ls=ls[i])
+        axs[1].plot(
+            ns.training_iterations, np.arange(len(ns.training_iterations)), ls=ls[i]
+        )
+        axs[2].plot(ns.training_iterations[1:], dtrain, ls=ls[i])
+
+        axs[3].plot(ns.population_iterations, ns.population_acceptance, ls=ls[i])
+
+    axs[0].set_ylim([0, 1])
+    axs[0].set_ylabel("Acceptance")
+
+    axs[1].set_ylabel("Cumulative \ntraining count")
+
+    axs[2].set_ylabel("Iterations \nbetween training")
+
+    axs[3].set_yscale("log")
+    axs[3].set_ylabel("Rejection sampling \nacceptance")
+
+    for ax in axs:
+        ylims = ax.get_ylim()
+        ax.set_ylim(ylims)
+        ax.fill_betweenx(
+            y=ax.get_ylim(),
+            x1=0,
+            x2=ns.training_iterations[0],
+            alpha=0.25,
+            zorder=-1,
+            color="gray",
+            lw=0.0,
+        )
+        ax.set_xlim([0, 75_000])
+
+    axs[-1].set_xlabel("Iteration")
+
+    axs[-1].legend(ncol=len(samplers), loc="center", bbox_to_anchor=(0.5, -0.4))
+
+    if filename is not None:
+        save_figure(fig, filename)
+    else:
+        return fig
+
+
+def plot_corner_comparison(
+    results,
+    filename: Optional[str] = None,
+    parameters: Optional[List[str]] = None,
+    legend_labels: Optional[List[str]] = None,
+    legend_position: Tuple[float] = None,
+    legend_fontsize: int = 14,
+    **kwargs,
+):
+    """Plot a corner plot comparing different results."""
+    kwargs = kwargs.copy()
+    kwargs.pop("color")
+    if "hist_kwargs" not in kwargs:
+        kwargs["hist_kwargs"] = {}
+    colours = sns.color_palette("colorblind")
+    kwargs["hist_kwargs"]["color"] = colours[0]
+
+    if parameters is None:
+        parameters = natsorted(
+            set(results[0]["posterior_samples"].dtype.names)
+            - set(nessai_config.livepoints.non_sampling_parameters)
+        )
+
+    labels = [rf"${p}$" for p in parameters]
+
+    fig = kwargs.pop("fig", None)
+    for i, result in enumerate(results):
+        kwargs["hist_kwargs"]["color"] = colours[i]
+        fig = corner_plot(
+            result["posterior_samples"],
+            include=parameters,
+            labels=labels,
+            fig=fig,
+            color=colours[i],
+            **kwargs,
+        )
+
+    if legend_labels is not None:
+        fig.legend(
+            handles=[
+                Line2D([0], [0], color=colours[i], label=legend_labels[i])
+                for i in range(len(legend_labels))
+            ],
+            loc="center",
+            fontsize=legend_fontsize,
+            bbox_to_anchor=legend_position,
+        )
+
+    if filename is not None:
+        save_figure(fig, filename)
+    else:
+        return fig
+
+
+def plot_multiple_bilby(
+    results,
+    labels=None,
+    colours=None,
+    corner_labels=None,
+    add_legend=False,
+    parameters=None,
+    **kwargs,
+):
+    """Generate a corner plot overlaying two sets of results
+
+    Based on various functions from bilby.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.lines as mpllines
+    from bilby.core.result import sanity_check_labels
+
+    kwargs["show_titles"] = False
+    kwargs["title_quantiles"] = None
+    if corner_labels is not None:
+        kwargs["labels"] = corner_labels
+
+    samples = [r.posterior[parameters].to_numpy() for r in results]
+
+    lines = []
+    fig = kwargs.pop("fig", None)
+    for i, s in enumerate(samples):
+        if colours:
+            c = colours[i]
+        else:
+            c = "C{}".format(i)
+        hist_kwargs = kwargs.get("hist_kwargs", dict())
+        hist_kwargs["color"] = c
+        fig = corner.corner(
+            s,
+            fig=fig,
+            save=False,
+            color=c,
+            **kwargs,
+        )
+        lines.append(mpllines.Line2D([0], [0], color=c, label=labels[i]))
+
+    # Rescale the axes
+    for i, ax in enumerate(fig.axes):
+        ax.autoscale()
+    plt.draw()
+
+    labels = sanity_check_labels(labels)
+
+    if add_legend:
+        axes = fig.get_axes()
+        ndim = int(np.sqrt(len(axes)))
+        axes[ndim - 1].legend(handles=lines)
+
+    return fig
 
 
 def crop_pdf(
