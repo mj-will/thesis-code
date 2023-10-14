@@ -3,6 +3,7 @@ from collections import namedtuple
 import importlib.resources
 from itertools import product
 import os
+import socket
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import corner
@@ -17,6 +18,7 @@ from scipy import stats
 import seaborn as sns
 import pandas as pd
 
+
 from . import conf
 
 
@@ -28,6 +30,12 @@ def set_plotting() -> None:
     nessai_config.plotting.disable_style = True
     with importlib.resources.path("thesis_utils.conf", "thesis.mplstyle") as p:
         plt.style.use(p)
+
+    # If using HAWK, set the latex path
+    if socket.gethostname() == "cl8":
+        os.environ["PATH"] = os.pathsep.join(
+            ("/usr/local/texlive/2023/bin/x86_64-linux", os.environ["PATH"])
+        )
 
 
 def get_default_figsize() -> np.ndarray[float, float]:
