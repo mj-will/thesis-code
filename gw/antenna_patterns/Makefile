@@ -9,3 +9,11 @@ $(plus_static) :
 
 $(cross_static) :
 	python plot_static.py
+
+.PHONY : html
+html:
+	python plot_static.py --html
+
+.PHONY : upload
+upload :
+	python plot_static.py --n-points=50 --html --upload

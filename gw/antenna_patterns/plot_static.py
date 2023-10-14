@@ -4,14 +4,44 @@ Plot the antenna beam pattern functions.
 
 Michael J. Williams 2023
 """
+import argparse
 import os
 import numpy as np
 from antenna_patterns import f_cross, f_plus
 from thesis_utils.coordinates import spherical_to_cartesian
+from thesis_utils.io import load_json, write_json
 from thesis_utils.plotting import get_default_figsize, crop_pdf
 from typing import Optional
 
 import plotly.graph_objects as go
+import chart_studio.plotly as py
+
+
+def parse_args() -> argparse.ArgumentParser:
+    """Parse the arguments"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--upload",
+        action="store_true",
+        help="Upload the figure to chart studio",
+    )
+    parser.add_argument(
+        "--html",
+        action="store_true",
+        help="Produce the HTML version",
+    )
+    parser.add_argument(
+        "--n-points",
+        default=200,
+        help="Number of points in the linspace",
+        type=int,
+    )
+    return parser.parse_args()
+
+
+def upload(fig: go.Figure, filename: str) -> str:
+    """Upload the figure and return the URL"""
+    return py.plot(fig, filename=filename, auto_open=False)
 
 
 def plot_surface(
@@ -48,6 +78,9 @@ def plot_surface(
 
 def main() -> None:
     figure_dir = "figures"
+    html_dir = "html"
+
+    args = parse_args()
 
     figsize_inches = get_default_figsize()
     dpi = 100
@@ -87,7 +120,7 @@ def main() -> None:
         ),
     )
 
-    n = 200
+    n = args.n_points
     theta = np.linspace(0, np.pi, n)
     phi = np.linspace(0, 2 * np.pi, n)
     psi = np.linspace(0, np.pi, 11, endpoint=True)
@@ -102,38 +135,67 @@ def main() -> None:
     fc = f_cross(theta_grid, phi_grid, 0) ** 2
 
     x, y, z = spherical_to_cartesian(theta_grid, phi_grid, 1.0)
-    for sf, filename in zip(
-        [fp, fc], ["antenna_plus.pdf", "antenna_cross.pdf"]
-    ):
+    plus_data = {
+        "func": fp,
+        "filename": "plus_antenna_pattern",
+        "title": "Plus antenna pattern",
+    }
+
+    cross_data = {
+        "func": fc,
+        "filename": "cross_antenna_pattern",
+        "title": "Cross antenna pattern",
+    }
+    for data in [plus_data, cross_data]:
+
+        sf = data["func"]
+        filename = data["filename"]
 
         fig = plot_surface(sf * x, sf * y, sf * z, surfacecolor=sf)
         fig.add_trace(ifo)
 
-        fig.update_layout(
-            autosize=False,
-            font_family="Serif",
-            scene=scene,
-            margin_l=0,
-            margin_t=0,
-            margin_b=5,
-            margin_r=0,
-            width=figsize[0],
-            height=figsize[1],
-        )
+        if args.html:
 
-        fig.write_image(
-            os.path.join(figure_dir, filename),
-            width=figsize[0],
-            height=figsize[1],
-        )
+            fig.update_layout(
+                scene=scene,
+                title=data["title"],
+            )
 
-        crop_pdf(
-            os.path.join(figure_dir, filename),
-            30,
-            10,
-            0,
-            0,
-        )
+            if args.upload:
+                url = upload(fig, filename)
+                url_data = load_json("urls.json")
+                url_data[filename] = url
+                write_json(url_data, "urls.json")
+            else:
+                fig.write_html(os.path.join(html_dir, filename + ".html"))
+
+        else:
+            fig.update_layout(
+                autosize=False,
+                font_family="Serif",
+                scene=scene,
+                margin_l=0,
+                margin_t=0,
+                margin_b=5,
+                margin_r=0,
+                width=figsize[0],
+                height=figsize[1],
+                title=data["title"],
+            )
+
+            fig.write_image(
+                os.path.join(figure_dir, filename + ".pdf"),
+                width=figsize[0],
+                height=figsize[1],
+            )
+
+            crop_pdf(
+                os.path.join(figure_dir, filename + ".pdf"),
+                30,
+                10,
+                0,
+                0,
+            )
 
 
 if __name__ == "__main__":
